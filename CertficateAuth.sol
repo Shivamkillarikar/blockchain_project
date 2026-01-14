@@ -14,7 +14,6 @@ contract CertificateAuth {
     mapping(string => bool) public hashExists; 
     address public admin;
 
-    // Event used to pull History into the frontend
     event CertificateIssued(string id, string name, string course, uint256 date);
 
     constructor() { admin = msg.sender; }
@@ -28,6 +27,8 @@ contract CertificateAuth {
     ) public {
         require(msg.sender == admin, "Only Admin");
         require(bytes(certs[_id].studentName).length == 0, "ID already exists");
+        // BLOCK DUPLICATE FILE CONTENTS
+        require(!hashExists[_fileHash], "This document has already been issued");
         
         certs[_id] = Certificate(_name, _course, _ipfs, _fileHash, block.timestamp);
         hashExists[_fileHash] = true;
@@ -37,7 +38,7 @@ contract CertificateAuth {
 
     function verify(string memory _id) public view returns (string memory, string memory, string memory, string memory, uint256) {
         Certificate memory temp = certs[_id];
-        require(bytes(temp.studentName).length > 0, "Record not found");
+        require(bytes(temp.studentName).length > 0, "Not found");
         return (temp.studentName, temp.course, temp.ipfsHash, temp.fileHash, temp.date);
     }
 }
