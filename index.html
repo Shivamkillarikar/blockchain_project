@@ -1,177 +1,169 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>CertiChain | Blockchain + IPFS</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
-        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); width: 450px; }
-        input, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; }
-        button { background: #007bff; color: white; cursor: pointer; border: none; font-weight: bold; }
-        #status { font-size: 0.9em; color: #666; text-align: center; }
-        .result-box { margin-top: 20px; padding: 15px; border: 1px dashed #28a745; background: #e9f7ef; border-radius: 10px; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h2>📜 CertiChain Pro</h2>
-        <p id="status">Connecting to MetaMask...</p>
-        <hr>
-        
-        <h3>Issuer Portal</h3>
-        <input type="text" id="certId" placeholder="Certificate ID">
-        <input type="text" id="studentName" placeholder="Student Name">
-        <input type="text" id="courseName" placeholder="Course Name">
-        <label>Upload Certificate PDF:</label>
-        <input type="file" id="fileInput">
-        <button onclick="issueCert()">Upload & Issue</button>
-
-        <hr>
-        <h3>Verifier Portal</h3>
-        <input type="text" id="verifyId" placeholder="Enter ID to verify">
-        <button style="background: #28a745;" onclick="verifyCert()">Verify Certificate</button>
-        
-        <div id="result"></div>
-    </div>
-    <script src="app.js"></script>
-</body>
-</html> -->
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CertiChain | Secure Verification</title>
+    <title>CityGuardian | Blockchain Portal</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #6366f1;
             --secondary: #a855f7;
+            --accent: #10b981;
             --bg: #0f172a;
-            --glass: rgba(255, 255, 255, 0.05);
+            --glass: rgba(255, 255, 255, 0.03);
             --border: rgba(255, 255, 255, 0.1);
         }
 
         body {
-            margin: 0;
-            font-family: 'Inter', system-ui, sans-serif;
             background: radial-gradient(circle at top left, #1e1b4b, #0f172a);
-            color: white;
+            color: #f8fafc;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
             min-height: 100vh;
-            padding: 20px;
+            padding: 40px 20px;
         }
 
-        .dashboard {
-            width: 100%;
-            max-width: 900px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            animation: fadeIn 0.8s ease-out;
-        }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .card {
-            background: var(--glass);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+        .header { text-align: center; margin-bottom: 40px; }
+        h1 { font-size: 3rem; margin: 0; background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        #status { 
+            background: var(--glass); 
+            padding: 8px 16px; 
+            border-radius: 20px; 
+            font-size: 0.85rem; 
             border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            transition: 0.3s;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .dashboard { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); 
+            gap: 24px; 
+            max-width: 1100px; 
+            width: 100%; 
+        }
+
+        .card { 
+            background: var(--glass); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid var(--border); 
+            border-radius: 24px; 
+            padding: 32px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
         }
 
         .card:hover { border-color: var(--primary); transform: translateY(-5px); }
+        .full { grid-column: 1 / -1; }
 
-        .full-width { grid-column: 1 / -1; text-align: center; }
+        h3 { font-size: 1.25rem; margin-top: 0; color: #cbd5e1; display: flex; align-items: center; gap: 10px; }
 
-        h2, h3 { margin-top: 0; background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            color: white;
+        input { 
+            width: 100%; 
+            padding: 14px; 
+            margin: 12px 0; 
+            background: rgba(0, 0, 0, 0.2); 
+            border: 1px solid var(--border); 
+            border-radius: 12px; 
+            color: white; 
             box-sizing: border-box;
             outline: none;
+            transition: 0.2s;
         }
 
-        input:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(99, 102, 241, 0.3); }
+        input:focus { border-color: var(--primary); background: rgba(0, 0, 0, 0.4); }
 
-        button {
-            width: 100%;
-            padding: 14px;
-            margin-top: 15px;
-            border: none;
-            border-radius: 10px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
+        button { 
+            width: 100%; 
+            padding: 14px; 
+            margin-top: 10px; 
+            border-radius: 12px; 
+            border: none; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: 0.3s; 
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
 
-        button:hover { filter: brightness(1.2); box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4); }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; }
+        .btn-accent { background: var(--accent); color: white; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: white; width: auto; padding: 8px 20px; }
 
-        .status-badge {
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            background: var(--glass);
+        button:hover { filter: brightness(1.1); box-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }
+
+        #historyList { 
+            margin-top: 20px; 
+            max-height: 250px; 
+            overflow-y: auto; 
+            padding-right: 10px;
+        }
+
+        .h-item { 
+            background: rgba(255, 255, 255, 0.02);
+            padding: 14px; 
+            border-radius: 12px;
+            margin-bottom: 10px;
             border: 1px solid var(--border);
-            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        #result { margin-top: 20px; line-height: 1.6; }
-        .success-msg { color: #4ade80; border-left: 4px solid #4ade80; padding-left: 15px; }
+        .verify-badge { background: rgba(16, 185, 129, 0.1); color: var(--accent); padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; }
+
+        /* Custom Scrollbar */
+        #historyList::-webkit-scrollbar { width: 6px; }
+        #historyList::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
 
         @media (max-width: 768px) { .dashboard { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-
-<div class="dashboard">
-    <div class="full-width">
-        <div class="status-badge" id="status">📡 Connecting to Web3...</div>
-        <h1>CertiChain Portal</h1>
-        <p>Immutable Academic Verification on Blockchain</p>
+    <div class="header">
+        <h1>🏙️ CityGuardian</h1>
+        <div id="status">📡 Initializing Web3...</div>
     </div>
 
-    <div class="card">
-        <h3>🏛️ Issue Certificate</h3>
-        <p style="font-size: 0.8em; color: #94a3b8;">Only authorized University Admins can use this panel.</p>
-        <input type="text" id="certId" placeholder="Unique Certificate ID">
-        <input type="text" id="studentName" placeholder="Full Student Name">
-        <input type="text" id="courseName" placeholder="Course/Degree Name">
-        <label style="font-size: 0.8em; display: block; margin-top: 10px;">Document PDF:</label>
-        <input type="file" id="fileInput">
-        <button onclick="issueCert()">Securely Issue</button>
-    </div>
+    <div class="dashboard">
+        <div class="card">
+            <h3>🏛️ Issue Certificate</h3>
+            <p style="color: #94a3b8; font-size: 0.85rem; margin-top: -10px;">Store academic credentials on-chain permanently.</p>
+            <input type="text" id="certId" placeholder="Certificate ID (e.g., 2026-001)">
+            <input type="text" id="studentName" placeholder="Full Student Name">
+            <input type="text" id="courseName" placeholder="Course / Major">
+            <label style="font-size: 0.75rem; color: #94a3b8; display: block; margin-left: 5px;">Upload Document PDF:</label>
+            <input type="file" id="fileInput">
+            <button class="btn-primary" onclick="issueCert()">Issue & Secure</button>
+        </div>
 
-    <div class="card">
-        <h3>🔍 Verify Authenticity</h3>
-        <p style="font-size: 0.8em; color: #94a3b8;">Enter the ID to fetch details directly from the blockchain.</p>
-        <input type="text" id="verifyId" placeholder="Enter Certificate ID">
-        <button onclick="verifyCert()" style="background: transparent; border: 1px solid var(--primary);">Verify Record</button>
-        
-        <div id="result">
+        <div class="card">
+            <h3>🔍 Verification Engine</h3>
+            <input type="text" id="verifyId" placeholder="Enter ID to fetch records">
+            <button class="btn-outline" style="width: 100%; margin-bottom: 20px;" onclick="verifyCert()">Check Registry</button>
+            
+            <div style="height: 1px; background: var(--border); margin: 24px 0;"></div>
+            
+            <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 10px;">Upload PDF to verify file integrity:</p>
+            <input type="file" id="verifyFile">
+            <button class="btn-accent" onclick="verifyByFile()">Compare Cryptographic Hash</button>
+            <div id="result"></div>
+        </div>
+
+        <div class="card full">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3>📜 Audit Logs</h3>
+                <button class="btn-outline" onclick="loadHistory()">Refresh Records</button>
             </div>
+            <div id="historyList"></div>
+        </div>
     </div>
-</div>
-
-<script src="app.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
