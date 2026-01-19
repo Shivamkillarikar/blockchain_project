@@ -1,4 +1,4 @@
-const contractAddress = "0xC6acBB1B2f6B1C6F9fB4AB0762cd71BBa709c140"; 
+const contractAddress = "0xc622984A1B4e83191210124410980f54d81782eB"; 
 const pinataJWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiI1YzVkMTI5MS0yYWFhLTRkNTctYjQ1Mi0wM2ZjZGYyOTAzYTciLCJlbWFpbCI6InNoaXZhbWtpbGxhcmlrYXIwMDdAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInBpbl9wb2xpY3kiOnsicmVnaW9ucyI6W3siZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjEsImlkIjoiRlJBMSJ9LHsiZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjEsImlkIjoiTllDMSJ9XSwidmVyc2lvbiI6MX0sIm1mYV9lbmFibGVkIjpmYWxzZSwic3RhdHVzIjoiQUNUSVZFIn0sImF1dGhlbnRpY2F0aW9uVHlwZSI6InNjb3BlZEtleSIsInNjb3BlZEtleUtleSI6Ijk3ZTBkMTI4MDRlODhiOTdhMmM1Iiwic2NvcGVkS2V5U2VjcmV0IjoiMTg2ZDM5ZTcyZTVkODEyYmU4MzJiM2I2ZDE3NzJiYmY5NDA5NjI5ZGVjM2Y1YjQ2MjI4Zjc1ZDEyN2M1N2E0MSIsImV4cCI6MTc5OTg5NzQ4OH0.N2bsf692ByiYui-h1sJkPIth9oKRkX9IF6NW6NMtyyU"; 
 const abi = [
 	{
@@ -185,14 +185,22 @@ const abi = [
 let contract;
 
 async function init() {
-    if (window.ethereum) {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        contract = new ethers.Contract(contractAddress, abi, provider.getSigner());
-        document.getElementById("status").innerText = "✅ Connected to Blockchain";
+     const provider = new ethers.providers.JsonRpcProvider(
+        "http://127.0.0.1:7545"
+    );
+
+    // Ganache account private key
+    const privateKey = "0xac913a4c1b2be4fe1f5b847102d9e294dde48a7515f885895dbf3a98dbac7823";
+
+    const signer = new ethers.Wallet(privateKey, provider);
+
+    // Create contract instance
+    contract = new ethers.Contract(contractAddress, abi, signer);
+
+    document.getElementById("status").innerText =
+        "✅ Connected to Blockchain (No MetaMask)";
         loadHistory();
     }
-}
 
 async function getFileHash(file) {
     const arrayBuffer = await file.arrayBuffer();
