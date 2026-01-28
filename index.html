@@ -1,699 +1,357 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>BlockCert - Decentralized Verification System</title>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
-
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-<link rel="stylesheet" href="styles.css">
-
-</head><body><!-- Animated Background -->
-
-<div class="bg-animation">
-
-    <div class="grid-overlay"></div>
-
-    <div class="gradient-orb orb-1"></div>
-
-    <div class="gradient-orb orb-2"></div>
-
-    <div class="gradient-orb orb-3"></div>
-
-    <canvas id="particles"></canvas>
-
-</div>
-
-
-
-<!-- Navigation Bar -->
-
-<nav class="navbar">
-
-    <div class="nav-container">
-
-        <div class="logo">
-
-            <div class="logo-icon">
-
-                <i class="fas fa-shield-alt"></i>
-
-            </div>
-
-            <span class="logo-text">Block<span class="highlight">Cert</span></span>
-
-        </div>
-
-        <div class="nav-links">
-
-            <a href="#issue" class="nav-link">Issue</a>
-
-            <a href="#verify" class="nav-link">Verify</a>
-
-            <a href="#audit" class="nav-link">Audit</a>
-
-        </div>
-
-        <div class="status-badge" id="status" onclick="connectWallet()" style="cursor:pointer">
-
-            <div class="status-pulse"></div>
-
-            <span>Initializing...</span>
-
-        </div>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlockCert - Decentralized Verification System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <div class="grid-overlay"></div>
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+        <canvas id="particles"></canvas>
     </div>
 
-</nav>
-
-
-
-<!-- Hero Section -->
-
-<section class="hero">
-
-    <div class="hero-content">
-
-        <div class="hero-badge" data-aos="fade-down">
-
-            <i class="fas fa-link"></i>
-
-            <span>Powered by Ethereum Blockchain</span>
-
-        </div>
-
-        <h1 class="hero-title" data-aos="fade-up" data-aos-delay="100">
-
-            Tamper-Proof
-
-            <span class="gradient-text">Certificate Verification</span>
-
-        </h1>
-
-        <p class="hero-subtitle" data-aos="fade-up" data-aos-delay="200">
-
-            Secure, immutable, and instantly verifiable academic credentials on the blockchain.
-
-            <br>Trust through transparency.
-
-        </p>
-
-        <div class="hero-stats" data-aos="fade-up" data-aos-delay="300">
-
-            <div class="stat-item">
-
-                <div class="stat-number" id="totalCerts">0</div>
-
-                <div class="stat-label">Certificates Issued</div>
-
-            </div>
-
-            <div class="stat-divider"></div>
-
-            <div class="stat-item">
-
-                <div class="stat-number" id="totalVerifications">0</div>
-
-                <div class="stat-label">Verifications</div>
-
-            </div>
-
-            <div class="stat-divider"></div>
-
-            <div class="stat-item">
-
-                <div class="stat-number">100%</div>
-
-                <div class="stat-label">Security</div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-
-<!-- Main Dashboard -->
-
-<main class="container">
-
-    <!-- Issue Certificate Section -->
-
-    <section id="issue" class="section" data-aos="fade-up">
-
-        <div class="section-header">
-
-            <div class="section-icon">
-
-                <i class="fas fa-certificate"></i>
-
-            </div>
-
-            <div>
-
-                <h2 class="section-title">Issue Certificate</h2>
-
-                <p class="section-desc">Mint academic credentials on the immutable blockchain</p>
-
-            </div>
-
-        </div>
-
-        
-
-        <div class="glass-card issue-card">
-
-            <div class="card-glow"></div>
-
-            <form id="issueForm" class="issue-form">
-
-                <div class="form-grid">
-
-                    <div class="form-group">
-
-                        <label class="form-label">
-
-                            <i class="fas fa-fingerprint"></i>
-
-                            Certificate ID
-
-                        </label>
-
-                        <div class="input-wrapper">
-
-                            <input type="text" id="certId" class="form-input" placeholder="e.g., CERT-2026-001" required>
-
-                            <div class="input-border"></div>
-
-                        </div>
-
-                    </div>
-
-
-
-                    <div class="form-group">
-
-                        <label class="form-label">
-
-                            <i class="fas fa-user-graduate"></i>
-
-                            Student Name
-
-                        </label>
-
-                        <div class="input-wrapper">
-
-                            <input type="text" id="studentName" class="form-input" placeholder="Full legal name" required>
-
-                            <div class="input-border"></div>
-
-                        </div>
-
-                    </div>
-
-
-
-                    <div class="form-group">
-
-                        <label class="form-label">
-
-                            <i class="fas fa-book"></i>
-
-                            Course / Major
-
-                        </label>
-
-                        <div class="input-wrapper">
-
-                            <input type="text" id="courseName" class="form-input" placeholder="e.g., Computer Science" required>
-
-                            <div class="input-border"></div>
-
-                        </div>
-
-                    </div>
-
-
-
-                    <div class="form-group">
-
-                        <label class="form-label">
-
-                            <i class="fas fa-file-pdf"></i>
-
-                            Certificate Document
-
-                        </label>
-
-                        <div class="file-upload">
-
-                            <input type="file" id="fileInput" accept=".pdf" required>
-
-                            <div class="file-upload-area">
-
-                                <i class="fas fa-cloud-upload-alt"></i>
-
-                                <span class="file-text">Click to upload or drag & drop</span>
-
-                                <span class="file-subtext">PDF format, max 10MB</span>
-
-                            </div>
-
-                            <div class="file-preview" id="filePreview"></div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-
-                <button type="button" class="btn btn-primary" onclick="issueCert()">
-
-                    <span class="btn-content">
-
-                        <i class="fas fa-lock"></i>
-
-                        <span>Issue & Secure on Blockchain</span>
-
-                    </span>
-
-                    <div class="btn-shimmer"></div>
-
-                </button>
-
-            </form>
-
-
-
-            <!-- Progress Indicator -->
-
-            <div class="progress-container" id="issueProgress" style="display: none;">
-
-                <div class="progress-steps">
-
-                    <div class="progress-step active" id="step1">
-
-                        <div class="step-icon"><i class="fas fa-file-upload"></i></div>
-
-                        <div class="step-label">Upload</div>
-
-                    </div>
-
-                    <div class="progress-line"></div>
-
-                    <div class="progress-step" id="step2">
-
-                        <div class="step-icon"><i class="fas fa-fingerprint"></i></div>
-
-                        <div class="step-label">Hash</div>
-
-                    </div>
-
-                    <div class="progress-line"></div>
-
-                    <div class="progress-step" id="step3">
-
-                        <div class="step-icon"><i class="fas fa-database"></i></div>
-
-                        <div class="step-label">IPFS</div>
-
-                    </div>
-
-                    <div class="progress-line"></div>
-
-                    <div class="progress-step" id="step4">
-
-                        <div class="step-icon"><i class="fas fa-link"></i></div>
-
-                        <div class="step-label">Blockchain</div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-
-    <!-- Verify Certificate Section -->
-
-    <section id="verify" class="section" data-aos="fade-up">
-
-        <div class="section-header">
-
-            <div class="section-icon">
-
-                <i class="fas fa-search"></i>
-
-            </div>
-
-            <div>
-
-                <h2 class="section-title">Verification Engine</h2>
-
-                <p class="section-desc">Authenticate credentials against blockchain records</p>
-
-            </div>
-
-        </div>
-
-
-
-        <div class="verification-grid">
-
-            <!-- Verify by ID -->
-
-            <div class="glass-card verify-card">
-
-                <div class="card-glow"></div>
-
-                <div class="verify-header">
-
-                    <i class="fas fa-id-card"></i>
-
-                    <h3>Verify by Certificate ID</h3>
-
-                </div>
-
-                <div class="form-group">
-
-                    <div class="input-wrapper">
-
-                        <input type="text" id="verifyId" class="form-input" placeholder="Enter certificate ID">
-
-                        <div class="input-border"></div>
-
-                    </div>
-
-                </div>
-
-                <button class="btn btn-secondary" onclick="verifyCert()">
-
-                    <span class="btn-content">
-
-                        <i class="fas fa-check-circle"></i>
-
-                        <span>Verify Certificate</span>
-
-                    </span>
-
-                </button>
-
-                <div id="result" class="verification-result"></div>
-
-            </div>
-
-
-
-            <!-- Verify by File -->
-
-            <div class="glass-card verify-card">
-
-                <div class="card-glow"></div>
-
-                <div class="verify-header">
-
-                    <i class="fas fa-file-signature"></i>
-
-                    <h3>Verify by Document Hash</h3>
-
-                </div>
-
-                <div class="form-group">
-
-                    <div class="file-upload file-upload-small">
-
-                        <input type="file" id="verifyFile" accept=".pdf">
-
-                        <div class="file-upload-area">
-
-                            <i class="fas fa-file-pdf"></i>
-
-                            <span class="file-text">Upload PDF to verify</span>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <button class="btn btn-accent" onclick="verifyByFile()">
-
-                    <span class="btn-content">
-
-                        <i class="fas fa-fingerprint"></i>
-
-                        <span>Compare Hash</span>
-
-                    </span>
-
-                </button>
-
-                <div id="hashResult" class="verification-result"></div>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-
-    <!-- Audit Trail Section -->
-
-    <section id="audit" class="section" data-aos="fade-up">
-
-        <div class="section-header">
-
-            <div class="section-icon">
-
-                <i class="fas fa-history"></i>
-
-            </div>
-
-            <div>
-
-                <h2 class="section-title">Blockchain Audit Trail</h2>
-
-                <p class="section-desc">Complete transaction history from genesis block</p>
-
-            </div>
-
-            <button class="btn btn-icon" onclick="loadHistory()">
-
-                <i class="fas fa-sync-alt"></i>
-
-                <span>Refresh</span>
-
-            </button>
-
-        </div>
-
-
-
-        <div class="glass-card audit-card">
-
-            <div class="card-glow"></div>
-
-            <div class="audit-filters">
-
-                <div class="search-box">
-
-                    <i class="fas fa-search"></i>
-
-                    <input type="text" id="searchAudit" placeholder="Search by ID, name, or course..." onkeyup="filterAudit()">
-
-                </div>
-
-            </div>
-
-            <div class="audit-list" id="historyList">
-
-                <div class="loading-spinner">
-
-                    <i class="fas fa-circle-notch fa-spin"></i>
-
-                    <p>Loading blockchain records...</p>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-
-    <!-- Features Showcase -->
-
-    <section class="features-section" data-aos="fade-up">
-
-        <h2 class="features-title">Why Choose BlockCert?</h2>
-
-        <div class="features-grid">
-
-            <div class="feature-card">
-
-                <div class="feature-icon">
-
-                    <i class="fas fa-shield-virus"></i>
-
-                </div>
-
-                <h3>Tamper-Proof</h3>
-
-                <p>Cryptographic hashing ensures documents cannot be altered</p>
-
-            </div>
-
-            <div class="feature-card">
-
-                <div class="feature-icon">
-
-                    <i class="fas fa-bolt"></i>
-
-                </div>
-
-                <h3>Instant Verification</h3>
-
-                <p>Real-time authentication in seconds, not days</p>
-
-            </div>
-
-            <div class="feature-card">
-
-                <div class="feature-icon">
-
-                    <i class="fas fa-globe"></i>
-
-                </div>
-
-                <h3>Decentralized Storage</h3>
-
-                <p>IPFS ensures permanent, distributed document access</p>
-
-            </div>
-
-            <div class="feature-card">
-
-                <div class="feature-icon">
-
-                    <i class="fas fa-lock"></i>
-
-                </div>
-
-                <h3>Immutable Records</h3>
-
-                <p>Blockchain guarantees permanent, unchangeable history</p>
-
-            </div>
-
-        </div>
-
-    </section>
-
-</main>
-
-
-
-<!-- Toast Notifications -->
-
-<div class="toast-container" id="toastContainer"></div>
-
-
-
-<!-- Footer -->
-
-<footer class="footer">
-
-    <div class="footer-content">
-
-        <div class="footer-section">
-
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
             <div class="logo">
-
                 <div class="logo-icon">
-
                     <i class="fas fa-shield-alt"></i>
-
                 </div>
-
                 <span class="logo-text">Block<span class="highlight">Cert</span></span>
+            </div>
+            <div class="nav-links">
+                <a href="#issue" class="nav-link">Issue</a>
+                <a href="#verify" class="nav-link">Verify</a>
+                <a href="#audit" class="nav-link">Audit</a>
+            </div>
+            <div class="status-badge" id="status" onclick="connectWallet()" style="cursor:pointer">
+                <div class="status-pulse"></div>
+                <span>Initializing...</span>
+            </div>
+        </div>
+    </nav>
 
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge" data-aos="fade-down">
+                <i class="fas fa-link"></i>
+                <span>Powered by Ethereum Blockchain</span>
+            </div>
+            <h1 class="hero-title" data-aos="fade-up" data-aos-delay="100">
+                Tamper-Proof
+                <span class="gradient-text">Certificate Verification</span>
+            </h1>
+            <p class="hero-subtitle" data-aos="fade-up" data-aos-delay="200">
+                Secure, immutable, and instantly verifiable academic credentials on the blockchain.
+                <br>Trust through transparency.
+            </p>
+            <div class="hero-stats" data-aos="fade-up" data-aos-delay="300">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalCerts">0</div>
+                    <div class="stat-label">Certificates Issued</div>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalVerifications">0</div>
+                    <div class="stat-label">Verifications</div>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Security</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Dashboard -->
+    <main class="container">
+        <!-- Issue Certificate Section -->
+        <section id="issue" class="section" data-aos="fade-up">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-certificate"></i>
+                </div>
+                <div>
+                    <h2 class="section-title">Issue Certificate</h2>
+                    <p class="section-desc">Mint academic credentials on the immutable blockchain</p>
+                </div>
+            </div>
+            
+            <div class="glass-card issue-card">
+                <div class="card-glow"></div>
+                <form id="issueForm" class="issue-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-fingerprint"></i>
+                                Certificate ID
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="text" id="certId" class="form-input" placeholder="e.g., CERT-2026-001" required>
+                                <div class="input-border"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-user-graduate"></i>
+                                Student Name
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="text" id="studentName" class="form-input" placeholder="Full legal name" required>
+                                <div class="input-border"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-book"></i>
+                                Course / Major
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="text" id="courseName" class="form-input" placeholder="e.g., Computer Science" required>
+                                <div class="input-border"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-file-pdf"></i>
+                                Certificate Document
+                            </label>
+                            <div class="file-upload">
+                                <input type="file" id="fileInput" accept=".pdf" required>
+                                <div class="file-upload-area">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <span class="file-text">Click to upload or drag & drop</span>
+                                    <span class="file-subtext">PDF format, max 10MB</span>
+                                </div>
+                                <div class="file-preview" id="filePreview"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-primary" onclick="issueCert()">
+                        <span class="btn-content">
+                            <i class="fas fa-lock"></i>
+                            <span>Issue & Secure on Blockchain</span>
+                        </span>
+                        <div class="btn-shimmer"></div>
+                    </button>
+                </form>
+
+                <!-- Progress Indicator -->
+                <div class="progress-container" id="issueProgress" style="display: none;">
+                    <div class="progress-steps">
+                        <div class="progress-step active" id="step1">
+                            <div class="step-icon"><i class="fas fa-file-upload"></i></div>
+                            <div class="step-label">Upload</div>
+                        </div>
+                        <div class="progress-line"></div>
+                        <div class="progress-step" id="step2">
+                            <div class="step-icon"><i class="fas fa-fingerprint"></i></div>
+                            <div class="step-label">Hash</div>
+                        </div>
+                        <div class="progress-line"></div>
+                        <div class="progress-step" id="step3">
+                            <div class="step-icon"><i class="fas fa-database"></i></div>
+                            <div class="step-label">IPFS</div>
+                        </div>
+                        <div class="progress-line"></div>
+                        <div class="progress-step" id="step4">
+                            <div class="step-icon"><i class="fas fa-link"></i></div>
+                            <div class="step-label">Blockchain</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Verify Certificate Section -->
+        <section id="verify" class="section" data-aos="fade-up">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div>
+                    <h2 class="section-title">Verification Engine</h2>
+                    <p class="section-desc">Authenticate credentials against blockchain records</p>
+                </div>
             </div>
 
-            <p>Securing academic credentials with blockchain technology</p>
+            <div class="verification-grid">
+                <!-- Verify by ID -->
+                <div class="glass-card verify-card">
+                    <div class="card-glow"></div>
+                    <div class="verify-header">
+                        <i class="fas fa-id-card"></i>
+                        <h3>Verify by Certificate ID</h3>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <input type="text" id="verifyId" class="form-input" placeholder="Enter certificate ID">
+                            <div class="input-border"></div>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="verifyCert()">
+                        <span class="btn-content">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Verify Certificate</span>
+                        </span>
+                    </button>
+                    <div id="result" class="verification-result"></div>
+                </div>
 
+                <!-- Verify by File -->
+                <div class="glass-card verify-card">
+                    <div class="card-glow"></div>
+                    <div class="verify-header">
+                        <i class="fas fa-file-signature"></i>
+                        <h3>Verify by Document Hash</h3>
+                    </div>
+                    <div class="form-group">
+                        <div class="file-upload file-upload-small">
+                            <input type="file" id="verifyFile" accept=".pdf">
+                            <div class="file-upload-area">
+                                <i class="fas fa-file-pdf"></i>
+                                <span class="file-text">Upload PDF to verify</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-accent" onclick="verifyByFile()">
+                        <span class="btn-content">
+                            <i class="fas fa-fingerprint"></i>
+                            <span>Compare Hash</span>
+                        </span>
+                    </button>
+                    <div id="hashResult" class="verification-result"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Audit Trail Section -->
+        <section id="audit" class="section" data-aos="fade-up">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-history"></i>
+                </div>
+                <div>
+                    <h2 class="section-title">Blockchain Audit Trail</h2>
+                    <p class="section-desc">Complete transaction history from genesis block</p>
+                </div>
+                <button class="btn btn-icon" onclick="loadHistory()">
+                    <i class="fas fa-sync-alt"></i>
+                    <span>Refresh</span>
+                </button>
+            </div>
+
+            <div class="glass-card audit-card">
+                <div class="card-glow"></div>
+                <div class="audit-filters">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchAudit" placeholder="Search by ID, name, or course..." onkeyup="filterAudit()">
+                    </div>
+                </div>
+                <div class="audit-list" id="historyList">
+                    <div class="loading-spinner">
+                        <i class="fas fa-circle-notch fa-spin"></i>
+                        <p>Loading blockchain records...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Showcase -->
+        <section class="features-section" data-aos="fade-up">
+            <h2 class="features-title">Why Choose BlockCert?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-virus"></i>
+                    </div>
+                    <h3>Tamper-Proof</h3>
+                    <p>Cryptographic hashing ensures documents cannot be altered</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Instant Verification</h3>
+                    <p>Real-time authentication in seconds, not days</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <h3>Decentralized Storage</h3>
+                    <p>IPFS ensures permanent, distributed document access</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h3>Immutable Records</h3>
+                    <p>Blockchain guarantees permanent, unchangeable history</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <span class="logo-text">Block<span class="highlight">Cert</span></span>
+                </div>
+                <p>Securing academic credentials with blockchain technology</p>
+            </div>
+            <div class="footer-section">
+                <h4>Technology</h4>
+                <ul>
+                    <li><i class="fab fa-ethereum"></i> Ethereum Smart Contracts</li>
+                    <li><i class="fas fa-database"></i> IPFS Decentralized Storage</li>
+                    <li><i class="fas fa-fingerprint"></i> SHA-256 Cryptography</li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#issue">Issue Certificate</a></li>
+                    <li><a href="#verify">Verify Document</a></li>
+                    <li><a href="#audit">View Audit Trail</a></li>
+                </ul>
+            </div>
         </div>
-
-        <div class="footer-section">
-
-            <h4>Technology</h4>
-
-            <ul>
-
-                <li><i class="fab fa-ethereum"></i> Ethereum Smart Contracts</li>
-
-                <li><i class="fas fa-database"></i> IPFS Decentralized Storage</li>
-
-                <li><i class="fas fa-fingerprint"></i> SHA-256 Cryptography</li>
-
-            </ul>
-
+        <div class="footer-bottom">
+            <p>&copy; 2026 BlockCert. Decentralized Certificate Verification System.</p>
+            <div class="footer-links">
+                <a href="#"><i class="fab fa-github"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-discord"></i></a>
+            </div>
         </div>
+    </footer>
 
-        <div class="footer-section">
-
-            <h4>Quick Links</h4>
-
-            <ul>
-
-                <li><a href="#issue">Issue Certificate</a></li>
-
-                <li><a href="#verify">Verify Document</a></li>
-
-                <li><a href="#audit">View Audit Trail</a></li>
-
-            </ul>
-
-        </div>
-
-    </div>
-
-    <div class="footer-bottom">
-
-        <p>&copy; 2026 BlockCert. Decentralized Certificate Verification System.</p>
-
-        <div class="footer-links">
-
-            <a href="#"><i class="fab fa-github"></i></a>
-
-            <a href="#"><i class="fab fa-twitter"></i></a>
-
-            <a href="#"><i class="fab fa-discord"></i></a>
-
-        </div>
-
-    </div>
-
-</footer>
-
-
-
-<script src="script.js"></script>
-
-</body></html>
+    <script src="script.js"></script>
+    <!-- <script src="animations.js"></script> -->
+</body>
+</html>
