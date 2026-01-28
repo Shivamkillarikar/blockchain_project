@@ -1,73 +1,191 @@
-const contractAddress = "0xc622984A1B4e83191210124410980f54d81782eB"; 
+const contractAddress = "0x89E796fcA0e04bA8F32b5B10a133EcF0457598e6"; 
 const pinataJWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiI1YzVkMTI5MS0yYWFhLTRkNTctYjQ1Mi0wM2ZjZGYyOTAzYTciLCJlbWFpbCI6InNoaXZhbWtpbGxhcmlrYXIwMDdAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInBpbl9wb2xpY3kiOnsicmVnaW9ucyI6W3siZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjEsImlkIjoiRlJBMSJ9LHsiZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjEsImlkIjoiTllDMSJ9XSwidmVyc2lvbiI6MX0sIm1mYV9lbmFibGVkIjpmYWxzZSwic3RhdHVzIjoiQUNUSVZFIn0sImF1dGhlbnRpY2F0aW9uVHlwZSI6InNjb3BlZEtleSIsInNjb3BlZEtleUtleSI6Ijk3ZTBkMTI4MDRlODhiOTdhMmM1Iiwic2NvcGVkS2V5U2VjcmV0IjoiMTg2ZDM5ZTcyZTVkODEyYmU4MzJiM2I2ZDE3NzJiYmY5NDA5NjI5ZGVjM2Y1YjQ2MjI4Zjc1ZDEyN2M1N2E0MSIsImV4cCI6MTc5OTg5NzQ4OH0.N2bsf692ByiYui-h1sJkPIth9oKRkX9IF6NW6NMtyyU"; 
 
 const abi = [
-    { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" },
     {
-        "anonymous": false,
-        "inputs": [
-            { "indexed": false, "internalType": "string", "name": "id", "type": "string" },
-            { "indexed": false, "internalType": "string", "name": "name", "type": "string" },
-            { "indexed": false, "internalType": "string", "name": "course", "type": "string" },
-            { "indexed": false, "internalType": "uint256", "name": "date", "type": "uint256" }
-        ],
-        "name": "CertificateIssued",
-        "type": "event"
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
     },
     {
-        "inputs": [],
-        "name": "admin",
-        "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
-        "stateMutability": "view",
-        "type": "function"
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "course",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "date",
+          "type": "uint256"
+        }
+      ],
+      "name": "CertificateIssued",
+      "type": "event"
     },
     {
-        "inputs": [{ "internalType": "string", "name": "", "type": "string" }],
-        "name": "certs",
-        "outputs": [
-            { "internalType": "string", "name": "studentName", "type": "string" },
-            { "internalType": "string", "name": "course", "type": "string" },
-            { "internalType": "string", "name": "ipfsHash", "type": "string" },
-            { "internalType": "string", "name": "fileHash", "type": "string" },
-            { "internalType": "uint256", "name": "date", "type": "uint256" }
-        ],
-        "stateMutability": "view",
-        "type": "function"
+      "inputs": [],
+      "name": "admin",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
     },
     {
-        "inputs": [{ "internalType": "string", "name": "", "type": "string" }],
-        "name": "hashExists",
-        "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
-        "stateMutability": "view",
-        "type": "function"
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "name": "certs",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "studentName",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "course",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "ipfsHash",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "fileHash",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "date",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
     },
     {
-        "inputs": [
-            { "internalType": "string", "name": "_id", "type": "string" },
-            { "internalType": "string", "name": "_name", "type": "string" },
-            { "internalType": "string", "name": "_course", "type": "string" },
-            { "internalType": "string", "name": "_ipfs", "type": "string" },
-            { "internalType": "string", "name": "_fileHash", "type": "string" }
-        ],
-        "name": "issueCertificate",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "name": "hashExists",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
     },
     {
-        "inputs": [{ "internalType": "string", "name": "_id", "type": "string" }],
-        "name": "verify",
-        "outputs": [
-            { "internalType": "string", "name": "", "type": "string" },
-            { "internalType": "string", "name": "", "type": "string" },
-            { "internalType": "string", "name": "", "type": "string" },
-            { "internalType": "string", "name": "", "type": "string" },
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-        ],
-        "stateMutability": "view",
-        "type": "function"
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_id",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_name",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_course",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_ipfs",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_fileHash",
+          "type": "string"
+        }
+      ],
+      "name": "issueCertificate",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_id",
+          "type": "string"
+        }
+      ],
+      "name": "verify",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
     }
-];
+  ];
 
 let contract;
 let totalCertsIssued = 0;
@@ -191,22 +309,34 @@ async function uploadToIPFS(file) {
 
 // ========== MAIN FUNCTIONS ==========
 async function issueCert() {
+    if (!contract) {
+        showToast("Please connect MetaMask first", "error");
+        return;
+    }
+
     const id = document.getElementById("certId").value.trim();
     const name = document.getElementById("studentName").value.trim();
     const course = document.getElementById("courseName").value.trim();
     const file = document.getElementById("fileInput").files[0];
 
-    if (!id || !name || !course || !file) return showToast("All fields required", 'error');
+    if (!id || !name || !course || !file)
+        return showToast("All fields required", 'error');
 
     try {
         showToast('Processing... Check MetaMask', 'info');
+
         const fileHash = await getFileHash(file);
         const ipfsHash = await uploadToIPFS(file);
-        
-        // MetaMask will pop up here
-        const tx = await contract.issueCertificate(id, name, course, ipfsHash, fileHash);
+
+        const tx = await contract.issueCertificate(
+            id,
+            name,
+            course,
+            ipfsHash,
+            fileHash
+        );
         await tx.wait();
-        
+
         showToast(`Success! Certificate ${id} Issued`, 'success');
         loadHistory();
     } catch (error) {
@@ -214,6 +344,7 @@ async function issueCert() {
         showToast('Transaction Failed', 'error');
     }
 }
+
 
 async function verifyCert() {
     const id = document.getElementById("verifyId").value.trim();
