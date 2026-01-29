@@ -1,5 +1,5 @@
-const contractAddress = "0x89E796fcA0e04bA8F32b5B10a133EcF0457598e6"; 
-const pinataJWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiI1YzVkMTI5MS0yYWFhLTRkNTctYjQ1Mi0wM2ZjZGYyOTAzYTciLCJlbWFpbCI6InNoaXZhbWtpbGxhcmlrYXIwMDdAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInBpbl9wb2xpY3kiOnsicmVnaW9ucyI6W3siZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjEsImlkIjoiRlJBMSJ9LHsiZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjEsImlkIjoiTllDMSJ9XSwidmVyc2lvbiI6MX0sIm1mYV9lbmFibGVkIjpmYWxzZSwic3RhdHVzIjoiQUNUSVZFIn0sImF1dGhlbnRpY2F0aW9uVHlwZSI6InNjb3BlZEtleSIsInNjb3BlZEtleUtleSI6Ijk3ZTBkMTI4MDRlODhiOTdhMmM1Iiwic2NvcGVkS2V5U2VjcmV0IjoiMTg2ZDM5ZTcyZTVkODEyYmU4MzJiM2I2ZDE3NzJiYmY5NDA5NjI5ZGVjM2Y1YjQ2MjI4Zjc1ZDEyN2M1N2E0MSIsImV4cCI6MTc5OTg5NzQ4OH0.N2bsf692ByiYui-h1sJkPIth9oKRkX9IF6NW6NMtyyU"; 
+const contractAddress = "0x89E796fcA0e04bA8F32b5B10a133EcF0457598e6";
+const pinataJWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiI1YzVkMTI5MS0yYWFhLTRkNTctYjQ1Mi0wM2ZjZGYyOTAzYTciLCJlbWFpbCI6InNoaXZhbWtpbGxhcmlrYXIwMDdAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInBpbl9wb2xpY3kiOnsicmVnaW9ucyI6W3siZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjEsImlkIjoiRlJBMSJ9LHsiZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjEsImlkIjoiTllDMSJ9XSwidmVyc2lvbiI6MX0sIm1mYV9lbmFibGVkIjpmYWxzZSwic3RhdHVzIjoiQUNUSVZFIn0sImF1dGhlbnRpY2F0aW9uVHlwZSI6InNjb3BlZEtleSIsInNjb3BlZEtleUtleSI6Ijk3ZTBkMTI4MDRlODhiOTdhMmM1Iiwic2NvcGVkS2V5U2VjcmV0IjoiMTg2ZDM5ZTcyZTVkODEyYmU4MzJiM2I2ZDE3NzJiYmY5NDA5NjI5ZGVjM2Y1YjQ2MjI4Zjc1ZDEyN2M1N2E0MSIsImV4cCI6MTc5OTg5NzQ4OH0.N2bsf692ByiYui-h1sJkPIth9oKRkX9IF6NW6NMtyyU";
 
 const abi = [
     {
@@ -185,7 +185,7 @@ const abi = [
       "type": "function",
       "constant": true
     }
-  ];
+];
 
 let contract;
 let totalCertsIssued = 0;
@@ -193,212 +193,537 @@ let totalVerifications = 0;
 
 // ========== INITIALIZATION ==========
 async function init() {
+    if (!window.ethereum) {
+        showToast("MetaMask not detected. Please install MetaMask extension.", "error");
+        updateStatus("❌ MetaMask Required");
+        return;
+    }
+    
     try {
-        updateStatus("📡 Initializing MetaMask...", false);
-
-        if (window.ethereum) {
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
-            
-            // Check if user is already connected
-            const accounts = await provider.listAccounts();
-            if (accounts.length > 0) {
-                await setupContractConnection(provider);
-            } else {
-                updateStatus("🦊 Click to Connect MetaMask", false);
-            }
-
-            // Listen for changes (Standard for dApps)
-            window.ethereum.on('accountsChanged', () => window.location.reload());
-            window.ethereum.on('chainChanged', () => window.location.reload());
-
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const accounts = await provider.listAccounts();
+        
+        if (accounts.length > 0) {
+            await setup(provider);
         } else {
-            updateStatus("❌ MetaMask Not Found", false);
-            showToast('Please install MetaMask!', 'error');
+            updateStatus("🦊 Connect MetaMask");
         }
+        
+        // Event listeners for account/network changes
+        window.ethereum.on('accountsChanged', () => {
+            window.location.reload();
+        });
+        
+        window.ethereum.on('chainChanged', () => {
+            window.location.reload();
+        });
+        
     } catch (error) {
-        console.error("Init Error:", error);
-        updateStatus("❌ Connection Failed", false);
+        console.error("Initialization error:", error);
+        showToast("Failed to initialize application", "error");
+    }
+    
+    // Setup file upload preview
+    initFileHandlers();
+}
+
+async function connectWallet() {
+    if (!window.ethereum) {
+        showToast("Please install MetaMask first!", "error");
+        return;
+    }
+    
+    try {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        await setup(provider);
+        showToast("Wallet connected successfully!", "success");
+    } catch (error) {
+        if (error.code === 4001) {
+            showToast("Connection rejected by user", "error");
+        } else {
+            showToast("Failed to connect wallet", "error");
+        }
     }
 }
 
-async function setupContractConnection(provider) {
+async function setup(provider) {
     const signer = provider.getSigner();
     contract = new ethers.Contract(contractAddress, abi, signer);
     
-    const userAddress = await signer.getAddress();
-    updateStatus(`✅ Connected: ${userAddress.substring(0, 6)}...${userAddress.substring(38)}`, true);
+    const addr = await signer.getAddress();
+    updateStatus(`✅ ${addr.slice(0, 6)}...${addr.slice(-4)}`);
     
-    showToast('Successfully linked to MetaMask', 'success');
     await loadHistory();
-    initFileUploadHandlers();
 }
 
-// Optional Connect Function for a button
-async function connectWallet() {
-    if (window.ethereum) {
-        try {
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
-            await provider.send("eth_requestAccounts", []);
-            await setupContractConnection(provider);
-        } catch (error) {
-            showToast('User rejected connection', 'error');
-        }
-    }
-}
-
-// ========== UTILITY FUNCTIONS ==========
-function updateStatus(message, connected) {
+function updateStatus(message) {
     const statusEl = document.getElementById("status");
     if (statusEl) {
-        statusEl.innerHTML = `<span>${message}</span>`;
-        if (connected) statusEl.style.borderColor = 'var(--accent)';
+        statusEl.innerHTML = `<i class="fas fa-wallet"></i><span>${message}</span>`;
     }
 }
 
-function showToast(message, type = 'info') {
-    const container = document.getElementById('toastContainer');
-    if (!container) return;
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.innerHTML = `<div class="toast-message">${message}</div>`;
-    container.appendChild(toast);
-    setTimeout(() => toast.remove(), 4000);
-}
-
-function updateStats() {
-    const certEl = document.getElementById('totalCerts');
-    const verEl = document.getElementById('totalVerifications');
-    if (certEl) certEl.textContent = totalCertsIssued;
-    if (verEl) verEl.textContent = totalVerifications;
-}
-
-// ========== FILE & IPFS HANDLING ==========
-function initFileUploadHandlers() {
-    const fileInput = document.getElementById('fileInput');
+// ========== FILE HANDLING ==========
+function initFileHandlers() {
+    const fileInput = document.getElementById("fileInput");
+    const verifyFile = document.getElementById("verifyFile");
+    
     if (fileInput) {
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            const preview = document.getElementById('filePreview');
-            if (file && preview) {
-                preview.classList.add('active');
-                preview.innerHTML = `<i class="fas fa-file-pdf"></i> <span>${file.name}</span>`;
-            }
-        });
+        fileInput.addEventListener("change", (e) => handleFilePreview(e, "filePreview"));
+    }
+    
+    if (verifyFile) {
+        verifyFile.addEventListener("change", (e) => handleFilePreview(e, "verifyFilePreview"));
+    }
+}
+
+function handleFilePreview(event, previewId) {
+    const file = event.target.files[0];
+    const preview = document.getElementById(previewId);
+    
+    if (file && preview) {
+        const fileName = file.name;
+        const fileSize = (file.size / 1024 / 1024).toFixed(2);
+        
+        preview.classList.add("active");
+        preview.innerHTML = `
+            <i class="fas fa-file-pdf"></i>
+            <span>${fileName} (${fileSize} MB)</span>
+        `;
     }
 }
 
 async function getFileHash(file) {
-    const arrayBuffer = await file.arrayBuffer();
-    const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    const buf = await file.arrayBuffer();
+    const hash = await crypto.subtle.digest("SHA-256", buf);
+    return Array.from(new Uint8Array(hash))
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join("");
 }
 
 async function uploadToIPFS(file) {
-    const formData = new FormData();
-    formData.append('file', file);
+    const fd = new FormData();
+    fd.append("file", file);
+    
     const res = await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS", {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${pinataJWT}` },
-        body: formData
+        method: "POST",
+        headers: { Authorization: `Bearer ${pinataJWT}` },
+        body: fd
     });
-    if (!res.ok) throw new Error('IPFS upload failed');
+    
+    if (!res.ok) {
+        throw new Error("IPFS upload failed");
+    }
+    
     const data = await res.json();
     return data.IpfsHash;
 }
 
-// ========== MAIN FUNCTIONS ==========
+// ========== CERTIFICATE ISSUANCE ==========
 async function issueCert() {
     if (!contract) {
-        showToast("Please connect MetaMask first", "error");
+        showToast("Please connect your wallet first", "error");
         return;
     }
-
+    
     const id = document.getElementById("certId").value.trim();
     const name = document.getElementById("studentName").value.trim();
     const course = document.getElementById("courseName").value.trim();
     const file = document.getElementById("fileInput").files[0];
-
-    if (!id || !name || !course || !file)
-        return showToast("All fields required", 'error');
-
+    
+    // Validation
+    if (!id || !name || !course || !file) {
+        showToast("All fields are required", "error");
+        return;
+    }
+    
     try {
-        showToast('Processing... Check MetaMask', 'info');
-
+        showToast("Processing... Please check MetaMask", "info");
+        
+        // Get file hash and upload to IPFS
         const fileHash = await getFileHash(file);
+        showToast("Uploading to IPFS...", "info");
         const ipfsHash = await uploadToIPFS(file);
-
-        const tx = await contract.issueCertificate(
-            id,
-            name,
-            course,
-            ipfsHash,
-            fileHash
-        );
-        await tx.wait();
-
-        showToast(`Success! Certificate ${id} Issued`, 'success');
-        loadHistory();
+        
+        // Issue certificate on blockchain
+        showToast("Confirm transaction in MetaMask", "info");
+        const tx = await contract.issueCertificate(id, name, course, ipfsHash, fileHash);
+        
+        showToast("Transaction submitted. Waiting for confirmation...", "info");
+        const receipt = await tx.wait();
+        
+        // Display success result
+        const resultDiv = document.getElementById("result");
+        if (resultDiv) {
+            resultDiv.className = "verification-result result-success";
+            resultDiv.innerHTML = `
+                <div class="result-title">
+                    <i class="fas fa-check-circle"></i>
+                    Certificate Issued Successfully
+                </div>
+                <div class="result-details">
+                    <div class="result-item">
+                        <strong>Certificate ID</strong>
+                        <span>${id}</span>
+                    </div>
+                    <div class="result-item">
+                        <strong>Student Name</strong>
+                        <span>${name}</span>
+                    </div>
+                    <div class="result-item">
+                        <strong>Course</strong>
+                        <span>${course}</span>
+                    </div>
+                    <div class="result-item">
+                        <strong>File Hash (SHA-256)</strong>
+                        <span>${fileHash}</span>
+                    </div>
+                    <div class="result-item">
+                        <strong>IPFS Hash</strong>
+                        <span>${ipfsHash}</span>
+                    </div>
+                    <div class="result-item">
+                        <strong>Transaction Hash</strong>
+                        <span>${tx.hash}</span>
+                    </div>
+                    <div class="result-item">
+                        <a href="https://gateway.pinata.cloud/ipfs/${ipfsHash}" target="_blank" class="btn btn-outline" style="margin-top:1rem;">
+                            <i class="fas fa-external-link-alt"></i> View Certificate on IPFS
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+        
+        showToast("Certificate issued successfully!", "success");
+        
+        // Clear form
+        document.getElementById("certId").value = "";
+        document.getElementById("studentName").value = "";
+        document.getElementById("courseName").value = "";
+        document.getElementById("fileInput").value = "";
+        document.getElementById("filePreview").classList.remove("active");
+        
+        // Reload history
+        await loadHistory();
+        
     } catch (error) {
-        console.error(error);
-        showToast('Transaction Failed', 'error');
+        console.error("Issue error:", error);
+        
+        if (error.code === 4001) {
+            showToast("Transaction rejected by user", "error");
+        } else if (error.message.includes("already exists")) {
+            showToast("Certificate ID already exists", "error");
+        } else {
+            showToast("Failed to issue certificate", "error");
+        }
     }
 }
 
-
+// ========== VERIFICATION FUNCTIONS ==========
 async function verifyCert() {
+    if (!contract) {
+        showToast("Please connect your wallet first", "error");
+        return;
+    }
+    
     const id = document.getElementById("verifyId").value.trim();
-    const resDiv = document.getElementById("result");
-    if (!id) return;
+    const resultDiv = document.getElementById("result");
+    
+    if (!id) {
+        showToast("Please enter a certificate ID", "error");
+        return;
+    }
     
     try {
-        const data = await contract.verify(id);
-        const date = new Date(data[4] * 1000).toLocaleDateString();
-        resDiv.innerHTML = `<b>✅ Authentic:</b> ${data[0]} - ${data[1]} (${date})`;
+        const cert = await contract.verify(id);
+        const date = new Date(cert[4] * 1000).toLocaleDateString();
+        
+        resultDiv.className = "verification-result result-success";
+        resultDiv.innerHTML = `
+            <div class="result-title">
+                <i class="fas fa-check-circle"></i>
+                Certificate Verified - Authentic
+            </div>
+            <div class="result-details">
+                <div class="result-item">
+                    <strong>Student Name</strong>
+                    <span>${cert[0]}</span>
+                </div>
+                <div class="result-item">
+                    <strong>Course</strong>
+                    <span>${cert[1]}</span>
+                </div>
+                <div class="result-item">
+                    <strong>Issue Date</strong>
+                    <span>${date}</span>
+                </div>
+                <div class="result-item">
+                    <strong>File Hash</strong>
+                    <span>${cert[3]}</span>
+                </div>
+                <div class="result-item">
+                    <a href="https://gateway.pinata.cloud/ipfs/${cert[2]}" target="_blank" class="btn btn-outline" style="margin-top:1rem;">
+                        <i class="fas fa-file-pdf"></i> View Original Certificate
+                    </a>
+                </div>
+            </div>
+        `;
+        
         totalVerifications++;
         updateStats();
-    } catch (e) {
-        resDiv.innerHTML = "<span style='color:red'>❌ ID Not Found</span>";
+        showToast("Certificate verified successfully", "success");
+        
+    } catch (error) {
+        resultDiv.className = "verification-result result-error";
+        resultDiv.innerHTML = `
+            <div class="result-title">
+                <i class="fas fa-times-circle"></i>
+                Certificate Not Found
+            </div>
+            <p style="margin-top:1rem; color: var(--muted);">
+                No certificate with ID "${id}" exists on the blockchain.
+                This may be a fake or unregistered certificate.
+            </p>
+        `;
+        showToast("Certificate not found", "error");
     }
 }
 
 async function verifyByFile() {
+    if (!contract) {
+        showToast("Please connect your wallet first", "error");
+        return;
+    }
+    
     const file = document.getElementById("verifyFile").files[0];
-    const resDiv = document.getElementById("hashResult");
-    if (!file) return;
-
+    const resultDiv = document.getElementById("hashResult");
+    
+    if (!file) {
+        showToast("Please select a file to verify", "error");
+        return;
+    }
+    
     try {
-        const uploadedHash = await getFileHash(file);
-        const exists = await contract.hashExists(uploadedHash);
-        resDiv.innerHTML = exists ? "✅ Match: Document Authentic" : "❌ No Match: Modified Document";
+        showToast("Computing file hash...", "info");
+        const hash = await getFileHash(file);
+        
+        showToast("Checking blockchain...", "info");
+        const exists = await contract.hashExists(hash);
+        
+        if (exists) {
+            resultDiv.className = "verification-result result-success";
+            resultDiv.innerHTML = `
+                <div class="result-title">
+                    <i class="fas fa-check-circle"></i>
+                    Document Verified - Authentic
+                </div>
+                <div class="result-details">
+                    <div class="result-item">
+                        <strong>File Hash</strong>
+                        <span>${hash}</span>
+                    </div>
+                    <p style="margin-top:1rem; color: var(--text-secondary);">
+                        This document exists on the blockchain and has not been modified.
+                    </p>
+                </div>
+            `;
+            showToast("Document is authentic", "success");
+        } else {
+            resultDiv.className = "verification-result result-error";
+            resultDiv.innerHTML = `
+                <div class="result-title">
+                    <i class="fas fa-times-circle"></i>
+                    Document Not Found
+                </div>
+                <div class="result-details">
+                    <div class="result-item">
+                        <strong>Computed Hash</strong>
+                        <span>${hash}</span>
+                    </div>
+                    <p style="margin-top:1rem; color: var(--muted);">
+                        This document's hash does not exist on the blockchain.
+                        It may be fake, modified, or never registered.
+                    </p>
+                </div>
+            `;
+            showToast("Document not verified - may be fake", "error");
+        }
+        
         totalVerifications++;
         updateStats();
-    } catch (e) {
-        showToast('Verification Error', 'error');
+        
+    } catch (error) {
+        console.error("Verification error:", error);
+        showToast("Verification failed", "error");
     }
 }
 
+async function verifyByHash() {
+    if (!contract) {
+        showToast("Please connect your wallet first", "error");
+        return;
+    }
+    
+    const hash = document.getElementById("verifyHashInput").value.trim();
+    const resultDiv = document.getElementById("hashVerifyResult");
+    
+    if (!hash) {
+        showToast("Please enter a hash value", "error");
+        return;
+    }
+    
+    try {
+        const exists = await contract.hashExists(hash);
+        
+        if (exists) {
+            resultDiv.className = "verification-result result-success";
+            resultDiv.innerHTML = `
+                <div class="result-title">
+                    <i class="fas fa-check-circle"></i>
+                    Hash Verified - Authentic
+                </div>
+                <p style="margin-top:1rem; color: var(--text-secondary);">
+                    This hash exists on the blockchain. The certificate is authentic.
+                </p>
+            `;
+            showToast("Hash verified - authentic certificate", "success");
+        } else {
+            resultDiv.className = "verification-result result-error";
+            resultDiv.innerHTML = `
+                <div class="result-title">
+                    <i class="fas fa-times-circle"></i>
+                    Hash Not Found
+                </div>
+                <p style="margin-top:1rem; color: var(--muted);">
+                    This hash does not exist on the blockchain.
+                    The document may be fake or unregistered.
+                </p>
+            `;
+            showToast("Hash not found - may be fake", "error");
+        }
+        
+        totalVerifications++;
+        updateStats();
+        
+    } catch (error) {
+        console.error("Hash verification error:", error);
+        showToast("Verification failed", "error");
+    }
+}
+
+// ========== AUDIT TRAIL ==========
 async function loadHistory() {
+    if (!contract) return;
+    
     try {
         const filter = contract.filters.CertificateIssued();
         const logs = await contract.queryFilter(filter, 0, "latest");
-        const list = document.getElementById("historyList");
-        if (!list) return;
         
         totalCertsIssued = logs.length;
         updateStats();
         
-        list.innerHTML = "";
-        logs.reverse().forEach(log => {
+        const historyList = document.getElementById("historyList");
+        if (!historyList) return;
+        
+        if (logs.length === 0) {
+            historyList.innerHTML = `
+                <div style="text-align:center; padding:3rem; color:var(--muted);">
+                    <i class="fas fa-inbox" style="font-size:3rem; margin-bottom:1rem; display:block;"></i>
+                    <p>No certificates issued yet</p>
+                </div>
+            `;
+            return;
+        }
+        
+        historyList.innerHTML = "";
+        
+        // Display in reverse chronological order
+        for (const log of logs.reverse()) {
             const { id, name, course } = log.args;
-            const item = document.createElement('div');
-            item.className = 'audit-item';
-            item.innerHTML = `🆔 ${id} | 👤 ${name} | 📚 ${course}`;
-            list.appendChild(item);
-        });
-    } catch (e) {
-        console.log("Load History Error");
+            const txHash = log.transactionHash;
+            
+            try {
+                const cert = await contract.verify(id);
+                const date = new Date(cert[4] * 1000).toLocaleDateString();
+                
+                const auditItem = document.createElement("div");
+                auditItem.className = "audit";
+                auditItem.innerHTML = `
+                    <div style="margin-bottom:0.5rem;">
+                        <b>Certificate ID:</b> ${id}
+                    </div>
+                    <div style="margin-bottom:0.5rem;">
+                        <b>Student:</b> ${name}
+                    </div>
+                    <div style="margin-bottom:0.5rem;">
+                        <b>Course:</b> ${course}
+                    </div>
+                    <div style="margin-bottom:0.5rem;">
+                        <b>Issue Date:</b> ${date}
+                    </div>
+                    <div style="margin-bottom:0.5rem;">
+                        <b>Transaction:</b> <span style="font-family:monospace; font-size:0.75rem; word-break:break-all;">${txHash}</span>
+                    </div>
+                    <div style="margin-bottom:0.5rem;">
+                        <b>File Hash:</b> <span style="font-family:monospace; font-size:0.75rem; word-break:break-all;">${cert[3]}</span>
+                    </div>
+                    <a href="https://gateway.pinata.cloud/ipfs/${cert[2]}" target="_blank">
+                        <i class="fas fa-external-link-alt"></i> View Certificate on IPFS
+                    </a>
+                `;
+                
+                historyList.appendChild(auditItem);
+            } catch (err) {
+                console.error("Error loading certificate details:", err);
+            }
+        }
+        
+    } catch (error) {
+        console.error("Load history error:", error);
+        showToast("Failed to load certificate history", "error");
     }
 }
 
+// ========== STATS UPDATE ==========
+function updateStats() {
+    const certEl = document.getElementById("totalCerts");
+    const verEl = document.getElementById("totalVerifications");
+    
+    if (certEl) {
+        certEl.textContent = totalCertsIssued;
+    }
+    
+    if (verEl) {
+        verEl.textContent = totalVerifications;
+    }
+}
+
+// ========== TOAST NOTIFICATIONS ==========
+function showToast(message, type = "info") {
+    const container = document.getElementById("toastContainer");
+    if (!container) return;
+    
+    const toast = document.createElement("div");
+    toast.className = `toast toast-${type}`;
+    
+    const icon = type === "success" ? "check-circle" : 
+                 type === "error" ? "exclamation-circle" : 
+                 "info-circle";
+    
+    toast.innerHTML = `
+        <i class="fas fa-${icon}" style="margin-right:0.5rem;"></i>
+        ${message}
+    `;
+    
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.animation = "slideInRight 0.3s ease reverse";
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+}
+
+// ========== INITIALIZE ON LOAD ==========
 window.onload = init;
